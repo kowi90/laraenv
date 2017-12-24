@@ -1,0 +1,43 @@
+version: '2'
+
+services:
+
+  mariadb:
+    image: 'bitnami/mariadb:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MARIADB_USER=test
+      - MARIADB_DATABASE=laravel
+      - MARIADB_PASSWORD=1234
+    ports: 
+      - 3306:3306
+
+  myapp:
+    tty: true
+    image: 'bitnami/laravel:latest'
+    labels:
+      kompose.service.type: nodeport
+    environment:
+      - DB_HOST=mariadb
+      - DB_USERNAME=test
+      - DB_DATABASE=laravel
+      - DB_PASSWORD=1234
+    depends_on:
+      - mariadb
+    ports:
+      - 80:3000
+    volumes:
+      - ./:/app
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+     - PMA_HOST=mariadb
+    restart: always
+    ports:
+     - 8080:80
+    depends_on:
+      - mariadb
+    volumes:
+     - /sessions
